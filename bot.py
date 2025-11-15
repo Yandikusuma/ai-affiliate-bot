@@ -54,7 +54,7 @@ LOCAL_QUOTES = [
     "🧨 Kalau kamu tidak promosi, orang lain yang akan ambil kesempatanmu."
     "🧺 Keranjang kuning mereka butuh keberanianmu untuk bicara."
     "💬 Satu kalimat jujur dari kontenmu bisa lebih kuat daripada iklan mahal."
-    "🌅 Mulai hari dengan satu niat: “Hari ini minimal satu konten tayang"."
+    "🌅 Mulai hari dengan satu niat: “Hari ini minimal satu konten tayang”."
     "😌 Tidak apa-apa kalau belum sempurna, yang penting tidak berhenti."
     "📚 Setiap konten adalah eksperimen, bukan ujian terakhir."
     "🎯 Bukan tentang viral hari ini, tapi tentang bertahan bertahun-tahun."
