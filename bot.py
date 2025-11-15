@@ -5,6 +5,7 @@ import time
 import openai
 import asyncio
 import os
+import requests
 import random
 import threading
 import requests
@@ -92,34 +93,51 @@ def notify_admin(text: str):
 
 
 
-# ===== QOUTE AI =====
-def sync_generate_quote_openai(api_key: str) -> str:
-    """
-    Panggilan synchronous ke OpenAI ChatCompletion.
-    Gunakan run_in_executor untuk memanggil ini dari async handler.
-    """
-    openai.api_key = api_key
-    prompt = (
-        "Buat satu quote motivasi singkat (1-2 kalimat) untuk content creator / "
-        "affiliate yang sedang membangun karya. Gunakan nada inspiratif, modern, "
-        "dan tambahkan satu emoji di akhir."
-    )
-    # ChatCompletion (pake openai v0.27.x)
-    resp = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[{"role": "user", "content": prompt}],
-        max_tokens=60,
-        temperature=0.8,
-    )
-    text = resp.choices[0].message.content.strip()
-    return text
+# simple HF generator
+def generate_quote_hf() -> str:
+    hf_token = os.environ.get("HF_TOKEN")
+    if not hf_token:
+        raise RuntimeError("HF_TOKEN belum diset di environment.")
 
-async def generate_quote_ai():
-    api_key = os.environ.get("OPENAI_API_KEY")
-    if not api_key:
-        raise RuntimeError("OPENAI_API_KEY tidak ditemukan. Set env var di Railway.")
-    loop = asyncio.get_running_loop()
-    return await loop.run_in_executor(None, sync_generate_quote_openai, api_key)
+    # model public yang ringan — ganti jika mau model lain
+    model = "google/flan-t5-small"  # small & cepat untuk teks pendek
+    url = f"https://api-inference.huggingface.co/models/{model}"
+    headers = {"Authorization": f"Bearer {hf_token}"}
+    payload = {
+        "inputs": (
+            "Buat satu quote motivasi singkat (1 kalimat) untuk content creator atau affiliate. "
+            "Tulis ringkas, punchy, dan tambahkan 1 emoji di akhir."
+        ),
+        "parameters": {"max_new_tokens": 60, "temperature": 0.8}
+    }
+
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+        # format respons sedikit berbeda antar model; coba beberapa kemungkinan
+        if isinstance(data, dict) and "error" in data:
+            # API mengembalikan error message
+            raise RuntimeError(f"HF error: {data['error']}")
+        # beberapa model kembalikan list of dict with generated_text
+        if isinstance(data, list) and "generated_text" in data[0]:
+            text = data[0]["generated_text"]
+        elif isinstance(data, dict) and "generated_text" in data:
+            text = data["generated_text"]
+        elif isinstance(data, list) and "generated_text" not in data[0]:
+            # kadang kembalikan plain text inside first item
+            text = data[0].get("generated_text") or str(data[0])
+        else:
+            text = str(data)
+        # bersihkan hasil
+        text = text.strip().replace("\n", " ")
+        return text
+    except Exception as e:
+        # log ke console kalau perlu (Railway logs)
+        print("generate_quote_hf error:", e)
+        # fallback lokal
+        return random.choice(LOCAL_QUOTES) + " _(fallback)_"
+
 
 
 # ===== Flask health server (dipakai UptimeRobot) =====
@@ -160,7 +178,7 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     Tampilkan product card untuk Affiliate Product Generator (link Lynk.id).
     """
     title = "🧰 Affiliate Product Generator — 5 in 1"
-    subtitle = "Bikin gambar & video produk untuk konten affiliate tanpa sample. Cepat, mudah, dan siap jual!"
+    subtitle = "Bikin gambar & video produk untuk konten affiliate tanpa sample. Cepat, mudah, dan siap upload!"
     bullets = (
         "• Generate foto produk realistis\n"
         "• Ubah Gaya Pose Model\n"
@@ -181,26 +199,14 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(text, reply_markup=keyboard, disable_web_page_preview=True)
 
 async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """
-    /quote -> selalu generate dari OpenAI.
-    Jika OpenAI gagal, user akan diberi tahu.
-    """
     try:
-        waiting = await update.message.reply_text("🧠 Menghasilkan quote dari AI... tunggu sebentar.")
-        quote = await generate_quote_ai()
-        # tampilkan hasil
+        waiting = await update.message.reply_text("🔄 Membuat quote gratis dari AI...")
+        quote = generate_quote_hf()
         await waiting.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
     except Exception as e:
-        # tampilkan pesan error yang ramah
-        err_msg = str(e)
-        if "OPENAI_API_KEY" in err_msg or "OPENAI_API_KEY" in repr(e):
-            await update.message.reply_text("⚠️ Bot belum dikonfigurasi: OPENAI_API_KEY belum diset di Railway.")
-        else:
-            await update.message.reply_text("⚠️ Gagal menghasilkan quote dari AI. Coba lagi nanti.")
-        # log di console (Railway logs)
-        import logging
-        logging.exception("Quote AI error: %s", e)
-
+        # aman: tampilkan fallback jika ada error
+        print("quote_command error:", e)
+        await update.message.reply_text("⚠️ Gagal membuat quote. Coba lagi nanti.")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
