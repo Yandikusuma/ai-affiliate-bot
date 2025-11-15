@@ -80,7 +80,7 @@ def notify_admin(text: str):
 # ===== Flask health server (dipakai UptimeRobot) =====
 health_app = Flask("health_server")
 
-@app.route("/health")
+@health_app.route("/health")
 def health():
     return jsonify({"status": "ok"}), 200
 
@@ -88,7 +88,7 @@ def run_health_server():
     # Railway biasanya jalankan web server di port yang disediakan oleh env PORT
     port = int(os.environ.get("PORT", "5000"))
     # jalankan flask di thread terpisah (debug False)
-    app.run(host="0.0.0.0", port=port, debug=False)
+    health_app.run(host="0.0.0.0", port=port, debug=False)
 
 # ====== BOT HANDLERS ======
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
