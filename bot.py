@@ -105,7 +105,7 @@ def generate_quote_deepinfra_sync():
     url = "https://api.deepinfra.com/v1/openai/chat/completions"
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     data = {
-        "model": "gpt-3.5-mini",  # model contoh; ganti jika mau model lain yang tersedia
+        "model": "allenai/olmOCR-2-7B-1025",  # model contoh; ganti jika mau model lain yang tersedia
         "messages": [{"role": "user", "content":
             "Buat 1 quote motivasi singkat (1 kalimat) untuk content creator/affiliate. Tambah 1 emoji."}],
         "max_tokens": 60,
