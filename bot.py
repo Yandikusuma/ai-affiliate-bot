@@ -93,87 +93,49 @@ def notify_admin(text: str):
 
 
 
-# daftar model fallback — urut dari yang paling direkomendasikan untuk teks pendek
-HF_MODEL_CANDIDATES = [
-    "gpt2",                     # very small, super reliable
-    "distilgpt2",               # lightweight & reliable
-    "facebook/opt-125m",        # small causal model
-    "bigscience/bloom-1b1",     # small-ish
-    # tambahkan model lain yang kamu temukan di HuggingFace yang mendukung inference
-]
+def generate_quote_hf() -> str:
+    hf_token = os.environ.get("HF_TOKEN")
+    if not hf_token:
+        raise RuntimeError("HF_TOKEN belum diset di environment.")
 
-def try_inference_model(model, hf_token, prompt, timeout=20):
+    # model public yang ringan — ganti jika mau model lain
+    model = "facebook/omnilingual-asr-corpus"  # small & cepat untuk teks pendek
     url = f"https://api-inference.huggingface.co/models/{model}"
     headers = {"Authorization": f"Bearer {hf_token}"}
     payload = {
-        "inputs": prompt,
+        "inputs": (
+            "Buat satu quote motivasi singkat (1 kalimat) untuk content creator atau affiliate. "
+            "Tulis ringkas, punchy, dan tambahkan 1 emoji di akhir."
+        ),
         "parameters": {"max_new_tokens": 60, "temperature": 0.8}
     }
-    resp = requests.post(url, headers=headers, json=payload, timeout=timeout)
-    # raise_for_status supaya error HTTP tertangkap di caller
-    resp.raise_for_status()
-    data = resp.json()
-    # beberapa model kembalikan list-of-dicts with generated_text
-    if isinstance(data, list):
-        # biasanya first item berisi generated_text
-        item = data[0]
-        if isinstance(item, dict) and "generated_text" in item:
-            return item["generated_text"].strip()
-        # kadang model mengembalikan plain string or different structure
-        return str(item).strip()
-    elif isinstance(data, dict):
-        if "generated_text" in data:
-            return data["generated_text"].strip()
-        # jika dict dengan field 'error' -> raise
-        if "error" in data:
+
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+        # format respons sedikit berbeda antar model; coba beberapa kemungkinan
+        if isinstance(data, dict) and "error" in data:
+            # API mengembalikan error message
             raise RuntimeError(f"HF error: {data['error']}")
-        return str(data).strip()
-    else:
-        return str(data).strip()
-
-def generate_quote_hf_resilient():
-    hf_token = os.environ.get("HF_TOKEN")
-    prompt = (
-        "Buat satu quote motivasi singkat (1 kalimat) untuk content creator atau affiliate. "
-        "Tulis ringkas, punchy, dan tambahkan 1 emoji di akhir."
-    )
-
-    if not hf_token:
-        # kalau token belum diset, langsung fallback lokal
-        return random.choice(LOCAL_QUOTES) + " _(no HF token)_"
-
-    # coba model prioritas dulu (opsional: kamu bisa tambahkan preferred model di depan)
-    candidates = HF_MODEL_CANDIDATES.copy()
-    # contoh: kamu bisa menambahkan model yang sempat gagal sebelumnya ke posisi akhir
-    # candidates.insert(0, "google/flan-t5-small")  # jangan pakai kalau sudah 410
-
-    last_err = None
-    for model in candidates:
-        try:
-            text = try_inference_model(model, hf_token, prompt)
-            # bersihkan & return
-            text = text.replace("\n", " ").strip()
-            if len(text) < 3:
-                # hasil terlalu pendek -> anggap gagal, lanjutkan
-                continue
-            return text
-        except requests.exceptions.HTTPError as he:
-            code = he.response.status_code
-            # jika 410/404, berarti model gone -> coba model lain
-            last_err = f"HTTP {code} on model {model}: {he}"
-            print("generate_quote_hf: model", model, "failed:", last_err)
-            time.sleep(0.5)
-            continue
-        except Exception as e:
-            last_err = str(e)
-            print("generate_quote_hf: model", model, "error:", last_err)
-            time.sleep(0.5)
-            continue
-
-    # kalau semua gagal -> fallback lokal
-    fallback = random.choice(LOCAL_QUOTES)
-    note = f" _(fallback: HF failures, last: {last_err})_"
-    return fallback + note
+        # beberapa model kembalikan list of dict with generated_text
+        if isinstance(data, list) and "generated_text" in data[0]:
+            text = data[0]["generated_text"]
+        elif isinstance(data, dict) and "generated_text" in data:
+            text = data["generated_text"]
+        elif isinstance(data, list) and "generated_text" not in data[0]:
+            # kadang kembalikan plain text inside first item
+            text = data[0].get("generated_text") or str(data[0])
+        else:
+            text = str(data)
+        # bersihkan hasil
+        text = text.strip().replace("\n", " ")
+        return text
+    except Exception as e:
+        # log ke console kalau perlu (Railway logs)
+        print("generate_quote_hf error:", e)
+        # fallback lokal
+        return random.choice(LOCAL_QUOTES) + " _(fallback)_"
 
 
 # ===== Flask health server (dipakai UptimeRobot) =====
@@ -235,9 +197,14 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(text, reply_markup=keyboard, disable_web_page_preview=True)
 
 async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    waiting = await update.message.reply_text("🔄 Membuat quote gratis dari Hari Ini...")
-    quote = generate_quote_hf_resilient()
-    await waiting.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
+    try:
+        waiting = await update.message.reply_text("🔄 Membuat quote gratis dari AI...")
+        quote = generate_quote_hf()
+        await waiting.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
+    except Exception as e:
+        # aman: tampilkan fallback jika ada error
+        print("quote_command error:", e)
+        await update.message.reply_text("⚠️ Gagal membuat quote. Coba lagi nanti.")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
