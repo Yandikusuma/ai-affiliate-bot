@@ -2,6 +2,8 @@
 import os
 import logging
 import time
+import openai
+import random
 import threading
 import requests
 from flask import Flask, jsonify
@@ -16,7 +18,14 @@ TOKEN = os.environ.get("TOKEN")
 ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID")  # contoh: "123456789"
 RESTART_DELAY = int(os.environ.get("RESTART_DELAY", "8"))  # detik tunggu sebelum restart
 
-
+LOCAL_QUOTES = [
+    "🚀 Proses dulu, hasil belakangan.",
+    "🔥 Konsisten kecil lebih penting daripada motivasi besar.",
+    "🎯 Kerjakan 1% hari ini, biar kamu unggul 100% besok.",
+    "💡 Kreativitas bukan bakat, tapi kebiasaan.",
+    "🤖 AI tidak menggantikan manusia—AI menggantikan yang tidak mau belajar.",
+    "🌱 Mulai kecil. Lanjut pelan. Menang besar.",
+]
 
 # -----------------------
 # /tools - tampil produk & link Lynk.id
@@ -77,6 +86,35 @@ def notify_admin(text: str):
     except Exception as e:
         logger.exception("Exception saat kirim notifikasi admin: %s", e)
 
+
+
+# ===== QOUTE AI =====
+async def generate_quote_ai():
+    openai_key = os.environ.get("OPENAI_API_KEY")
+    if not openai_key:
+        return random.choice(LOCAL_QUOTES)
+
+    openai.api_key = openai_key
+
+    prompt = (
+        "Buatkan satu quote motivasi singkat (1-2 kalimat) untuk content creator "
+        "atau affiliate yang sedang membangun karya. Gunakan nada inspiratif, modern, "
+        "dan tambahkan 1 emoji di akhir."
+    )
+
+    try:
+        resp = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role":"user","content": prompt}],
+            max_tokens=60,
+            temperature=0.8
+        )
+        return resp.choices[0].message.content.strip()
+    except:
+        return random.choice(LOCAL_QUOTES)
+
+
+
 # ===== Flask health server (dipakai UptimeRobot) =====
 health_app = Flask("health_server")
 
@@ -118,7 +156,7 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     subtitle = "Bikin gambar & video produk untuk konten affiliate tanpa sample. Cepat, mudah, dan siap jual!"
     bullets = (
         "• Generate foto produk realistis\n"
-        "• Template prompt & caption siap pakai\n"
+        "• Ubah Gaya Pose Model\n"
         "• Export HD untuk TikTok/Marketplace\n"
         "• Cocok untuk affiliate tanpa sample"
     )
@@ -129,11 +167,16 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("🛒 Beli di Lynk.id", url=LYNK_URL)],
         [InlineKeyboardButton("ℹ️ Detail Produk", callback_data="product_details")],
-        [InlineKeyboardButton("🔗 Semua Link", callback_data="show_links")]
+        # [InlineKeyboardButton("🔗 Semua Link", callback_data="show_links")]
     ])
 
     # Kirim sebagai Markdown, tanpa preview link (karena tombol sudah ada)
     await update.message.reply_markdown(text, reply_markup=keyboard, disable_web_page_preview=True)
+
+async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    msg = await update.message.reply_text("🧠 Sedang membuat quote dari AI...")
+    quote = await generate_quote_ai()
+    await msg.edit_text(quote)
 
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
@@ -152,10 +195,10 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         detail_text = (
             "*Affiliate Product Generator — 5 in 1*\n\n"
             "Fitur utama:\n"
-            "• Photo studio mockup (flatlay, white background, lifestyle)\n"
-            "• Video short creative (loopable, 9:16) untuk TikTok\n"
-            "• Prompt pack & caption templates untuk konversi\n"
-            "• Export cepat & berbagai aspect ratio\n\n"
+            "• AFFILIATE Content Generator (flatlay, white background, lifestyle)\n"
+            "• AI Pose & Background Generator - Ubah Gaya Pose\n"
+            "• Custome GPT PROMT\n"
+            "• Gampang digunakan dan pastinya tanpa sampel\n\n"
             "Cara beli: tekan tombol *Beli di Lynk.id* di pesan sebelumnya.\n"
             "Butuh demo atau contoh hasil? Reply di grup dan tag @SirYanz"
         )
@@ -163,16 +206,16 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # --- show other links (opsional) ---
-    if query.data == "show_links":
-        links_text = (
-            "🔗 *Link Penting*\n\n"
-            f"• Beli produk: {LYNK_URL}\n"
-            "• Group: (masukkan link grup kalau mau)\n"
-            "• Tutorial: (link/placeholder)\n\n"
-            "Klik tombol *Beli di Lynk.id* untuk langsung membeli."
-        )
-        await query.message.reply_markdown(links_text, disable_web_page_preview=True)
-        return
+    # if query.data == "show_links":
+    #     links_text = (
+    #         "🔗 *Link Penting*\n\n"
+    #         f"• Beli produk: {LYNK_URL}\n"
+    #         "• Group: (masukkan link grup kalau mau)\n"
+    #         "• Tutorial: (link/placeholder)\n\n"
+    #         "Klik tombol *Beli di Lynk.id* untuk langsung membeli."
+    #     )
+    #     await query.message.reply_markdown(links_text, disable_web_page_preview=True)
+    #     return
 
 # ====== Function to build and run the bot once ======
 def run_bot_once():
@@ -184,6 +227,7 @@ def run_bot_once():
     tg_app.add_handler(CommandHandler("start", start_command))
     tg_app.add_handler(CommandHandler("rules", rules_command))
     tg_app.add_handler(CommandHandler("tools", tools_command))
+    tg_app.add_handler(CommandHandler("quote", quote_command))
     tg_app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
     tg_app.add_handler(CallbackQueryHandler(callback_handler))
 
