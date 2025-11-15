@@ -67,13 +67,18 @@ def notify_admin(text: str):
         url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
         payload = {"chat_id": ADMIN_CHAT_ID, "text": text}
         resp = requests.post(url, data=payload, timeout=10)
-        if resp.status_code != 200:
+        if resp.status_code == 200:
+            logger.info("Notifikasi admin terkirim.")
+        else:
             logger.warning("Gagal kirim notifikasi admin: %s %s", resp.status_code, resp.text)
+            # jika 403, beri info khusus
+            if resp.status_code == 403:
+                logger.warning("403 Forbidden: Bot tidak bisa memulai percakapan. Minta admin /start bot di chat pribadi.")
     except Exception as e:
         logger.exception("Exception saat kirim notifikasi admin: %s", e)
 
 # ===== Flask health server (dipakai UptimeRobot) =====
-app = Flask("health_server")
+health_app = Flask("health_server")
 
 @app.route("/health")
 def health():
@@ -174,17 +179,17 @@ def run_bot_once():
     if not TOKEN:
         logger.error("TOKEN tidak ditemukan. Set environment variable TOKEN dulu.")
         raise RuntimeError("TOKEN missing")
-    app_builder = ApplicationBuilder().token(TOKEN).build()
+    tg_app = ApplicationBuilder().token(TOKEN).build()
 
-    app_builder.add_handler(CommandHandler("start", start_command))
-    app_builder.add_handler(CommandHandler("rules", rules_command))
-    app.add_handler(CommandHandler("tools", tools_command))
-    app_builder.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
-    app_builder.add_handler(CallbackQueryHandler(callback_handler))
+    tg_app.add_handler(CommandHandler("start", start_command))
+    tg_app.add_handler(CommandHandler("rules", rules_command))
+    tg_app.add_handler(CommandHandler("tools", tools_command))
+    tg_app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
+    tg_app.add_handler(CallbackQueryHandler(callback_handler))
 
     logger.info("Application built. Running polling...")
     # Run polling (blocking call)
-    app_builder.run_polling()
+    tg_app.run_polling()
 
 # ====== Supervisor loop: restart on crash & notify admin ======
 def main_supervisor():
