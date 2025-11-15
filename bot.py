@@ -93,50 +93,38 @@ def notify_admin(text: str):
 
 
 
-def generate_quote_hf() -> str:
-    hf_token = os.environ.get("HF_TOKEN")
-    if not hf_token:
-        raise RuntimeError("HF_TOKEN belum diset di environment.")
+def generate_quote_deepinfra_sync():
+    """
+    Synchronous call ke DeepInfra OpenAI-compatible endpoint.
+    Returns text (string). Raise/return fallback on failure.
+    """
+    key = os.environ.get("DEEPINFRA_KEY")
+    if not key:
+        return random.choice(LOCAL_QUOTES) + " _(no DEEPINFRA_KEY)_"
 
-    # model public yang ringan — ganti jika mau model lain
-    model = "facebook/omnilingual-asr-corpus"  # small & cepat untuk teks pendek
-    url = f"https://api-inference.huggingface.co/models/{model}"
-    headers = {"Authorization": f"Bearer {hf_token}"}
-    payload = {
-        "inputs": (
-            "Buat satu quote motivasi singkat (1 kalimat) untuk content creator atau affiliate. "
-            "Tulis ringkas, punchy, dan tambahkan 1 emoji di akhir."
-        ),
-        "parameters": {"max_new_tokens": 60, "temperature": 0.8}
+    url = "https://api.deepinfra.com/v1/openai/chat/completions"
+    headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+    data = {
+        "model": "gpt-3.5-mini",  # model contoh; ganti jika mau model lain yang tersedia
+        "messages": [{"role": "user", "content":
+            "Buat 1 quote motivasi singkat (1 kalimat) untuk content creator/affiliate. Tambah 1 emoji."}],
+        "max_tokens": 60,
+        "temperature": 0.8
     }
-
     try:
-        resp = requests.post(url, headers=headers, json=payload, timeout=20)
-        resp.raise_for_status()
-        data = resp.json()
-        # format respons sedikit berbeda antar model; coba beberapa kemungkinan
-        if isinstance(data, dict) and "error" in data:
-            # API mengembalikan error message
-            raise RuntimeError(f"HF error: {data['error']}")
-        # beberapa model kembalikan list of dict with generated_text
-        if isinstance(data, list) and "generated_text" in data[0]:
-            text = data[0]["generated_text"]
-        elif isinstance(data, dict) and "generated_text" in data:
-            text = data["generated_text"]
-        elif isinstance(data, list) and "generated_text" not in data[0]:
-            # kadang kembalikan plain text inside first item
-            text = data[0].get("generated_text") or str(data[0])
-        else:
-            text = str(data)
-        # bersihkan hasil
-        text = text.strip().replace("\n", " ")
+        r = requests.post(url, headers=headers, json=data, timeout=15)
+        r.raise_for_status()
+        j = r.json()
+        # struktur mirip OpenAI: j["choices"][0]["message"]["content"]
+        text = j["choices"][0]["message"]["content"].strip()
         return text
     except Exception as e:
-        # log ke console kalau perlu (Railway logs)
-        print("generate_quote_hf error:", e)
-        # fallback lokal
+        print("generate_quote_deepinfra error:", e)
         return random.choice(LOCAL_QUOTES) + " _(fallback)_"
 
+async def generate_quote_deepinfra():
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, generate_quote_deepinfra_sync)
 
 # ===== Flask health server (dipakai UptimeRobot) =====
 health_app = Flask("health_server")
@@ -197,14 +185,9 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(text, reply_markup=keyboard, disable_web_page_preview=True)
 
 async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    try:
-        waiting = await update.message.reply_text("🔄 Membuat quote gratis dari AI...")
-        quote = generate_quote_hf()
-        await waiting.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
-    except Exception as e:
-        # aman: tampilkan fallback jika ada error
-        print("quote_command error:", e)
-        await update.message.reply_text("⚠️ Gagal membuat quote. Coba lagi nanti.")
+    msg = await update.message.reply_text("🧠 Membuat quote (DeepInfra)...")
+    quote = await generate_quote_deepinfra()
+    await msg.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = (
