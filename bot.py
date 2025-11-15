@@ -248,7 +248,7 @@ async def new_member_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text = f"👋 Hai *{name}*!\n\n{WELCOME_MESSAGE}"
         keyboard = InlineKeyboardMarkup.from_row([
             InlineKeyboardButton("Baca Rules", callback_data="show_rules"),
-            InlineKeyboardButton("ℹ️ Help Menu", callback_data="open_help"")
+            InlineKeyboardButton("ℹ️ Help Menu", callback_data="open_help")
         ])
         await update.effective_chat.send_message(text, reply_markup=keyboard, parse_mode="Markdown")
 
@@ -341,9 +341,12 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     #     )
     #     await query.message.reply_markdown(links_text, disable_web_page_preview=True)
     #     return
+    if query.data == "open_help":
+        await query.message.reply_text("Gunakan /help untuk melihat semua fitur bot.")
+        return
 
     if query.data == "help_quote":
-        await query.message.reply_text("Ketik /quote untuk mendapatkan quote motivasi dari AI ⚡")
+        await query.message.reply_text("Ketik /quote untuk mendapatkan quote motivasi hari ini ⚡")
         return
 
     if query.data == "menu_tools":
