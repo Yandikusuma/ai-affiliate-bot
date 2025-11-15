@@ -137,7 +137,8 @@ LYNK_URL = "https://lynk.id/siryanz/1mzez3ze9wlj"
 WELCOME_MESSAGE = (
     "👋 Selamat datang di *AI Affiliate Academy - SirYanz*!\n\n"
     "✨ Di sini kita belajar bikin konten affiliate pakai AI: gambar, video, prompt, dan strategi.\n\n"
-    "📌 Sebelum mulai, baca rules dengan ketik /rules\n"
+    "📌 Lihat semua fitur bot dengan ketik /help"
+    "📜 Sebelum mulai, baca rules dengan ketik /rules\n"
     "🎯 Tulis intro singkat (nama + mau belajar apa) biar kita kenal ya.\n\n"
     "Semoga betah dan bermanfaat — Team SirYanz 🤖🌿"
 )
@@ -216,22 +217,20 @@ def notify_admin(text: str):
 #         print("generate_quote_deepinfra error:", e)
 #         return random.choice(LOCAL_QUOTES) + " _(fallback)_"
 
-# async def generate_quote_deepinfra():
-#     loop = asyncio.get_running_loop()
-#     return await loop.run_in_executor(None, generate_quote_deepinfra_sync)
 
-# # ===== Flask health server (dipakai UptimeRobot) =====
-# health_app = Flask("health_server")
 
-# @health_app.route("/health")
-# def health():
-#     return jsonify({"status": "ok"}), 200
+# ===== Flask health server (dipakai UptimeRobot) =====
+health_app = Flask("health_server")
 
-# def run_health_server():
-#     # Railway biasanya jalankan web server di port yang disediakan oleh env PORT
-#     port = int(os.environ.get("PORT", "5000"))
-#     # jalankan flask di thread terpisah (debug False)
-#     health_app.run(host="0.0.0.0", port=port, debug=False)
+@health_app.route("/health")
+def health():
+     return jsonify({"status": "ok"}), 200
+
+def run_health_server():
+     # Railway biasanya jalankan web server di port yang disediakan oleh env PORT
+     port = int(os.environ.get("PORT", "5000"))
+     # jalankan flask di thread terpisah (debug False)
+     health_app.run(host="0.0.0.0", port=port, debug=False)
 
 # ====== BOT HANDLERS ======
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -249,7 +248,7 @@ async def new_member_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
         text = f"👋 Hai *{name}*!\n\n{WELCOME_MESSAGE}"
         keyboard = InlineKeyboardMarkup.from_row([
             InlineKeyboardButton("Baca Rules", callback_data="show_rules"),
-            InlineKeyboardButton("Perkenalkan Diri", callback_data="intro_template")
+            InlineKeyboardButton("ℹ️ Help Menu", callback_data="open_help"")
         ])
         await update.effective_chat.send_message(text, reply_markup=keyboard, parse_mode="Markdown")
 
