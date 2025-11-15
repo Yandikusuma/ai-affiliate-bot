@@ -24,105 +24,105 @@ RESTART_DELAY = int(os.environ.get("RESTART_DELAY", "8"))  # detik tunggu sebelu
 
 # ====== QOUTES LOCAL =====
 LOCAL_QUOTES = [
-    "🎯 Konsisten upload hari ini, konsisten terima komisi di kemudian hari."
-    "🔥 Jangan malu views kecil, yang penting niatmu besar."
-    "🚀 Satu konten lebih berharga dari seribu wacana yang tidak jadi."
-    "💡 Algoritma bisa berubah, tapi kerja kerasmu selalu relevan."
-    "🌱 Setiap video adalah benih, hasilnya tumbuh di waktu yang tak kamu duga."
-    "⚡ Jangan nunggu percaya diri, bikin konten sampai kepercayaan diri terbentuk sendiri."
-    "📈 Views naik itu bonus, proses belajar itu investasi."
-    "🧠 Gagal hari ini cuma data, besok tinggal kamu optimasi."
-    "💪 Capek boleh, berhenti jangan dulu."
-    "🎬 Kontenmu bisa jadi biasa buatmu, tapi bisa sangat berharga buat orang lain."
-    "🌟 Jangan remehkan satu konten, dia bisa jadi pintu rezeki yang tak kamu sangka."
-    "🧩 Tugasmu cuma satu: kirim karya, bukan mikirin semua kemungkinan buruk."
-    "🔍 Kalau kamu fokus bantu orang, algoritma pelan-pelan akan bantu kamu."
-    "📌 Ingat, setiap expert dulu juga nol viewers."
-    "🎧 Biarkan orang lain meremehkan, yang penting kamu tetap berkarya."
-    "🧱 Hari ini satu konten, besok satu lagi, begitu caramu membangun “imperium” kecilmu."
-    "🌊 Engagement naik itu bukan keajaiban, tapi hasil dari konsistensi diam-diam."
-    "🕒 Lebih baik mulai terlambat daripada cuma jadi penonton selamanya."
-    "🪜 Konten pertama mungkin buruk, tapi tanpa konten pertama tidak akan ada konten terbaikmu."
-    "🧲 Bukan tugasmu menyenangkan semua orang, tugasmu menemukan orang yang cocok dengan kontenmu."
-    "🎯 Jangan fokus siapa yang nggak nonton, fokus siapa yang diam-diam terbantu."
-    "🚪 Satu konten bisa membuka pintu peluang yang tidak pernah kamu bayangkan."
-    "🔗 Affiliate itu tentang hubungan, bukan sekadar link."
-    "💸 Komisi besar dimulai dari keberanian posting yang kelihatan sepele."
-    "🧭 Kalau niatmu bantu orang memilih lebih mudah, uang akan ikut mengejar."
-    "📣 Jangan takut menjual, karena mungkin orang memang sedang menunggu rekomendasimu."
-    "🧱 Setiap komisi kecil hari ini melatih mental kamu untuk komisi besar nanti."
-    "🧨 Kalau kamu tidak promosi, orang lain yang akan ambil kesempatanmu."
-    "🧺 Keranjang kuning mereka butuh keberanianmu untuk bicara."
-    "💬 Satu kalimat jujur dari kontenmu bisa lebih kuat daripada iklan mahal."
-    "🌅 Mulai hari dengan satu niat: “Hari ini minimal satu konten tayang”."
-    "😌 Tidak apa-apa kalau belum sempurna, yang penting tidak berhenti."
-    "📚 Setiap konten adalah eksperimen, bukan ujian terakhir."
-    "🎯 Bukan tentang viral hari ini, tapi tentang bertahan bertahun-tahun."
-    "🪙 Kualitas itu penting, tapi keberanian publish jauh lebih mahal."
-    "🔁 Kalau gagal, revisi; kalau berhasil, ulangi."
-    "🏃‍♂️ Kamu bukan terlambat, kamu hanya baru mulai serius."
-    "🧱 Algoritma bisa berat sebelah, tapi kerja konsistenmu tidak akan sia-sia."
-    "💥 Jangan bunuh idemu dengan overthinking sebelum sempat dicoba."
-    "✈️ Kontenmu bisa terbang jauh ke orang yang bahkan tidak kamu kenal, tapi butuh kamu tekan tombol “post”."
-    "🌟 Brandingmu terbentuk dari hal kecil yang kamu ulang terus."
-    "🧱 Setiap like, share, dan save adalah batu bata untuk masa depanmu."
-    "👀 Orang mungkin tidak melihat prosesmu, tapi hasilnya akan bicara."
-    "🎁 Konten gratis yang kamu bagikan hari ini bisa jadi alasan orang belanja lewatmu besok."
-    "🧠 Semakin sering kamu bikin konten, semakin tajam insting marketingmu."
-    "🚦 Kamu tidak harus jago di awal, kamu hanya perlu berani mulai."
-    "🧯 Kalau takut dinilai orang, ingat: mereka juga sibuk dipusingkan hidupnya sendiri."
-    "🌱 Konten kecil hari ini bisa jadi akar penghasilan pasifmu nanti."
-    "📊 Belajar baca data itu penting, tapi jangan lupa gerak dulu baru dianalisis."
-    "🧗 Setiap penolakan dan skip adalah tangga menuju audiens yang tepat."
-    "💎 Jujur dalam review, maka kepercayaan akan jadi aset terbesarmu."
-    "🧲 Jangan kejar viral, kejarlah relevan."
-    "🎯 Audience kecil tapi loyal jauh lebih berharga daripada angka besar tanpa rasa."
-    "🧱 Kamu tidak perlu alat mahal, kamu hanya perlu niat yang tidak gampang pudar."
-    "🚀 Satu improvement kecil tiap hari lebih kuat daripada satu lompatan yang tidak pernah terjadi."
-    "🧠 Skill editing bisa dipelajari, tapi mental konsisten harus kamu latih."
-    "⏳ Waktu akan lewat juga, lebih baik lewat sambil kamu upload daripada cuma scroll."
-    "🔍 Kalau satu jenis konten tidak jalan, itu bukan kamu gagal, itu sinyal untuk geser strategi."
-    "🧭 Jangan bandingkan episode satu perjalananmu dengan episode seratus orang lain."
-    "🧱 Kamu sedang membangun sesuatu yang belum terlihat, tapi nanti akan kamu syukuri."
-    "🎬 Tugasmu bukan sempurna di kamera, tapi tulus di hadapan kamera."
-    "🧩 Kontenmu tidak harus disukai semua orang, cukup berguna bagi orang yang tepat."
-    "🔗 Affiliate sukses itu kombinasi kepercayaan, konsistensi, dan keberanian menawarkan."
-    "💳 Kamu bukan “maksa jualan”, kamu sedang bantu orang menemukan produk yang mereka butuhkan."
-    "🧱 Bangun dulu kepercayaan, komisi akan ikut mengalir."
-    "💭 Kalau kamu sendiri tidak percaya pada kontenmu, bagaimana orang lain bisa yakin untuk klik link-mu."
-    "🌈 Variasikan ide, tapi jangan lupakan identitasmu."
-    "🧠 Konten sederhana tapi rutin sering menang melawan konten kompleks yang jarang."
-    "🌍 Suara kecilmu di internet tetap bisa mengubah hari seseorang."
-    "🚪 Lifetime value penonton sering dimulai dari satu konten random yang mereka lihat di FYP."
-    "🌟 Mungkin hari ini sepi, tapi bisa jadi besok salah satu videomu “dibangunkan” algoritma."
-    "🕹️ Mainkan game content creator dengan sabar, bukan dengan emosi."
-    "🔁 Ulangi hal yang berhasil, bukan hanya mengeluh pada hal yang gagal."
-    "🧱 Setiap hari kamu menunda, kamu mengulur datangnya peluang."
-    "🧯 Kritik pedas bisa melukai ego, tapi bisa juga mengasah kualitas."
-    "📌 Simpan niatmu: bantu dulu, jual belakangan."
-    "🧗 Naik pelan-pelan tetap lebih baik daripada tidak bergerak sama sekali."
-    "🧲 Kamu tidak perlu jadi paling hebat, cukup jadi paling konsisten di niche-mu."
-    "💬 Satu CTA jelas lebih baik daripada sepuluh konten tanpa ajakan apa-apa."
-    "🧠 Jangan hanya bikin konten yang kamu suka, bikin juga konten yang audience-mu butuh."
-    "🌱 Kamu menanam kepercayaan setiap kali jujur dalam review produk."
-    "🔍 Jika hasil belum sesuai, jangan langsung ganti mimpi, ganti dulu strategi."
-    "🧱 “Tidak ada ide” sering kali hanya berarti kamu terlalu takut mencoba ide yang ada."
-    "💪 Ingat, kamu sudah pernah melewati hari-hari sulit sebelumnya, konten sepi ini bukan apa-apa."
-    "🎯 Satu niche jelas lebih kuat daripada seribu arah yang membingungkan."
-    "🧭 Kalau lelah, boleh pelan, tapi jangan balik arah."
-    "📈 Naik turun itu wajar, yang penting garis besarnya tetap menanjak."
-    "🧠 Belajar dari creator lain, tapi jangan lupa tetap jadi dirimu sendiri."
-    "📣 Suaramu unik, dan di luar sana ada orang yang menunggu gaya bicaramu."
-    "🧺 Jangan malu kasih link, bisa jadi itu solusi dari masalah orang lain."
-    "😎 Kamu bukan hanya “content creator”, kamu adalah “problem solver” dengan gaya yang seru."
-    "🎁 Konten bermanfaat adalah hadiah gratis untuk audience, dan kepercayaan mereka adalah hadiah untukmu."
-    "🧱 Setiap hari kamu belajar sedikit, besok strategi affiliate-mu akan jauh lebih tajam."
-    "✨ Kamu tidak perlu ratusan ribu followers untuk mulai menghasilkan."
-    "🧠 Jangan buru-buru bilang “bukan rezeki”, padahal kamu belum konsisten uji konten."
-    "🔗 Link affiliate-mu hanyalah alat, yang membuat orang klik adalah value kontenmu."
-    "📌 Pegang satu prinsip: upload dulu, belajar setelahnya, upgrade di konten berikutnya."
-    "🚀 Ketika kamu serius menggarap satu konten, kamu sedang mendekat ke satu peluang baru."
-    "🌈 Kontenmu mungkin kecil, tapi bisa jadi pengingat besar untuk orang lain."
+    "🎯 Konsisten upload hari ini, konsisten terima komisi di kemudian hari.",
+    "🔥 Jangan malu views kecil, yang penting niatmu besar.",
+    "🚀 Satu konten lebih berharga dari seribu wacana yang tidak jadi.",
+    "💡 Algoritma bisa berubah, tapi kerja kerasmu selalu relevan.",
+    "🌱 Setiap video adalah benih, hasilnya tumbuh di waktu yang tak kamu duga.",
+    "⚡ Jangan nunggu percaya diri, bikin konten sampai kepercayaan diri terbentuk sendiri.",
+    "📈 Views naik itu bonus, proses belajar itu investasi.",
+    "🧠 Gagal hari ini cuma data, besok tinggal kamu optimasi.",
+    "💪 Capek boleh, berhenti jangan dulu.",
+    "🎬 Kontenmu bisa jadi biasa buatmu, tapi bisa sangat berharga buat orang lain.",
+    "🌟 Jangan remehkan satu konten, dia bisa jadi pintu rezeki yang tak kamu sangka.",
+    "🧩 Tugasmu cuma satu: kirim karya, bukan mikirin semua kemungkinan buruk.",
+    "🔍 Kalau kamu fokus bantu orang, algoritma pelan-pelan akan bantu kamu.",
+    "📌 Ingat, setiap expert dulu juga nol viewers.",
+    "🎧 Biarkan orang lain meremehkan, yang penting kamu tetap berkarya.",
+    "🧱 Hari ini satu konten, besok satu lagi, begitu caramu membangun “imperium” kecilmu.",
+    "🌊 Engagement naik itu bukan keajaiban, tapi hasil dari konsistensi diam-diam.",
+    "🕒 Lebih baik mulai terlambat daripada cuma jadi penonton selamanya.",
+    "🪜 Konten pertama mungkin buruk, tapi tanpa konten pertama tidak akan ada konten terbaikmu.",
+    "🧲 Bukan tugasmu menyenangkan semua orang, tugasmu menemukan orang yang cocok dengan kontenmu.",
+    "🎯 Jangan fokus siapa yang nggak nonton, fokus siapa yang diam-diam terbantu.",
+    "🚪 Satu konten bisa membuka pintu peluang yang tidak pernah kamu bayangkan.",
+    "🔗 Affiliate itu tentang hubungan, bukan sekadar link.",
+    "💸 Komisi besar dimulai dari keberanian posting yang kelihatan sepele.",
+    "🧭 Kalau niatmu bantu orang memilih lebih mudah, uang akan ikut mengejar.",
+    "📣 Jangan takut menjual, karena mungkin orang memang sedang menunggu rekomendasimu.",
+    "🧱 Setiap komisi kecil hari ini melatih mental kamu untuk komisi besar nanti.",
+    "🧨 Kalau kamu tidak promosi, orang lain yang akan ambil kesempatanmu.",
+    "🧺 Keranjang kuning mereka butuh keberanianmu untuk bicara.",
+    "💬 Satu kalimat jujur dari kontenmu bisa lebih kuat daripada iklan mahal.",
+    "🌅 Mulai hari dengan satu niat: “Hari ini minimal satu konten tayang”.",
+    "😌 Tidak apa-apa kalau belum sempurna, yang penting tidak berhenti.",
+    "📚 Setiap konten adalah eksperimen, bukan ujian terakhir.",
+    "🎯 Bukan tentang viral hari ini, tapi tentang bertahan bertahun-tahun.",
+    "🪙 Kualitas itu penting, tapi keberanian publish jauh lebih mahal.",
+    "🔁 Kalau gagal, revisi; kalau berhasil, ulangi.",
+    "🏃‍♂️ Kamu bukan terlambat, kamu hanya baru mulai serius.",
+    "🧱 Algoritma bisa berat sebelah, tapi kerja konsistenmu tidak akan sia-sia.",
+    "💥 Jangan bunuh idemu dengan overthinking sebelum sempat dicoba.",
+    "✈️ Kontenmu bisa terbang jauh ke orang yang bahkan tidak kamu kenal, tapi butuh kamu tekan tombol “post”.",
+    "🌟 Brandingmu terbentuk dari hal kecil yang kamu ulang terus.",
+    "🧱 Setiap like, share, dan save adalah batu bata untuk masa depanmu.",
+    "👀 Orang mungkin tidak melihat prosesmu, tapi hasilnya akan bicara.",
+    "🎁 Konten gratis yang kamu bagikan hari ini bisa jadi alasan orang belanja lewatmu besok.",
+    "🧠 Semakin sering kamu bikin konten, semakin tajam insting marketingmu.",
+    "🚦 Kamu tidak harus jago di awal, kamu hanya perlu berani mulai.",
+    "🧯 Kalau takut dinilai orang, ingat: mereka juga sibuk dipusingkan hidupnya sendiri.",
+    "🌱 Konten kecil hari ini bisa jadi akar penghasilan pasifmu nanti.",
+    "📊 Belajar baca data itu penting, tapi jangan lupa gerak dulu baru dianalisis.",
+    "🧗 Setiap penolakan dan skip adalah tangga menuju audiens yang tepat.",
+    "💎 Jujur dalam review, maka kepercayaan akan jadi aset terbesarmu.",
+    "🧲 Jangan kejar viral, kejarlah relevan.",
+    "🎯 Audience kecil tapi loyal jauh lebih berharga daripada angka besar tanpa rasa.",
+    "🧱 Kamu tidak perlu alat mahal, kamu hanya perlu niat yang tidak gampang pudar.",
+    "🚀 Satu improvement kecil tiap hari lebih kuat daripada satu lompatan yang tidak pernah terjadi.",
+    "🧠 Skill editing bisa dipelajari, tapi mental konsisten harus kamu latih.",
+    "⏳ Waktu akan lewat juga, lebih baik lewat sambil kamu upload daripada cuma scroll.",
+    "🔍 Kalau satu jenis konten tidak jalan, itu bukan kamu gagal, itu sinyal untuk geser strategi.",
+    "🧭 Jangan bandingkan episode satu perjalananmu dengan episode seratus orang lain.",
+    "🧱 Kamu sedang membangun sesuatu yang belum terlihat, tapi nanti akan kamu syukuri.",
+    "🎬 Tugasmu bukan sempurna di kamera, tapi tulus di hadapan kamera.",
+    "🧩 Kontenmu tidak harus disukai semua orang, cukup berguna bagi orang yang tepat.",
+    "🔗 Affiliate sukses itu kombinasi kepercayaan, konsistensi, dan keberanian menawarkan.",
+    "💳 Kamu bukan “maksa jualan”, kamu sedang bantu orang menemukan produk yang mereka butuhkan.",
+    "🧱 Bangun dulu kepercayaan, komisi akan ikut mengalir.",
+    "💭 Kalau kamu sendiri tidak percaya pada kontenmu, bagaimana orang lain bisa yakin untuk klik link-mu.",
+    "🌈 Variasikan ide, tapi jangan lupakan identitasmu.",
+    "🧠 Konten sederhana tapi rutin sering menang melawan konten kompleks yang jarang.",
+    "🌍 Suara kecilmu di internet tetap bisa mengubah hari seseorang.",
+    "🚪 Lifetime value penonton sering dimulai dari satu konten random yang mereka lihat di FYP.",
+    "🌟 Mungkin hari ini sepi, tapi bisa jadi besok salah satu videomu “dibangunkan” algoritma.",
+    "🕹️ Mainkan game content creator dengan sabar, bukan dengan emosi.",
+    "🔁 Ulangi hal yang berhasil, bukan hanya mengeluh pada hal yang gagal.",
+    "🧱 Setiap hari kamu menunda, kamu mengulur datangnya peluang.",
+    "🧯 Kritik pedas bisa melukai ego, tapi bisa juga mengasah kualitas.",
+    "📌 Simpan niatmu: bantu dulu, jual belakangan.",
+    "🧗 Naik pelan-pelan tetap lebih baik daripada tidak bergerak sama sekali.",
+    "🧲 Kamu tidak perlu jadi paling hebat, cukup jadi paling konsisten di niche-mu.",
+    "💬 Satu CTA jelas lebih baik daripada sepuluh konten tanpa ajakan apa-apa.",
+    "🧠 Jangan hanya bikin konten yang kamu suka, bikin juga konten yang audience-mu butuh.",
+    "🌱 Kamu menanam kepercayaan setiap kali jujur dalam review produk.",
+    "🔍 Jika hasil belum sesuai, jangan langsung ganti mimpi, ganti dulu strategi.",
+    "🧱 “Tidak ada ide” sering kali hanya berarti kamu terlalu takut mencoba ide yang ada.",
+    "💪 Ingat, kamu sudah pernah melewati hari-hari sulit sebelumnya, konten sepi ini bukan apa-apa.",
+    "🎯 Satu niche jelas lebih kuat daripada seribu arah yang membingungkan.",
+    "🧭 Kalau lelah, boleh pelan, tapi jangan balik arah.",
+    "📈 Naik turun itu wajar, yang penting garis besarnya tetap menanjak.",
+    "🧠 Belajar dari creator lain, tapi jangan lupa tetap jadi dirimu sendiri.",
+    "📣 Suaramu unik, dan di luar sana ada orang yang menunggu gaya bicaramu.",
+    "🧺 Jangan malu kasih link, bisa jadi itu solusi dari masalah orang lain.",
+    "😎 Kamu bukan hanya “content creator”, kamu adalah “problem solver” dengan gaya yang seru.",
+    "🎁 Konten bermanfaat adalah hadiah gratis untuk audience, dan kepercayaan mereka adalah hadiah untukmu.",
+    "🧱 Setiap hari kamu belajar sedikit, besok strategi affiliate-mu akan jauh lebih tajam.",
+    "✨ Kamu tidak perlu ratusan ribu followers untuk mulai menghasilkan.",
+    "🧠 Jangan buru-buru bilang “bukan rezeki”, padahal kamu belum konsisten uji konten.",
+    "🔗 Link affiliate-mu hanyalah alat, yang membuat orang klik adalah value kontenmu.",
+    "📌 Pegang satu prinsip: upload dulu, belajar setelahnya, upgrade di konten berikutnya.",
+    "🚀 Ketika kamu serius menggarap satu konten, kamu sedang mendekat ke satu peluang baru.",
+    "🌈 Kontenmu mungkin kecil, tapi bisa jadi pengingat besar untuk orang lain.",
     "🏆 Terus muncul di layar orang, sampai mereka percaya kalau kamu layak dipercaya.",
 ]
 
@@ -137,7 +137,7 @@ LYNK_URL = "https://lynk.id/siryanz/1mzez3ze9wlj"
 WELCOME_MESSAGE = (
     "👋 Selamat datang di *AI Affiliate Academy - SirYanz*!\n\n"
     "✨ Di sini kita belajar bikin konten affiliate pakai AI: gambar, video, prompt, dan strategi.\n\n"
-    "📌 Lihat semua fitur bot dengan ketik /help"
+    "📌 Lihat semua fitur bot dengan ketik /help\n"
     "📜 Sebelum mulai, baca rules dengan ketik /rules\n"
     "🎯 Tulis intro singkat (nama + mau belajar apa) biar kita kenal ya.\n\n"
     "Semoga betah dan bermanfaat — Team SirYanz 🤖🌿"
