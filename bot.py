@@ -148,7 +148,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
     # --- product details ---
-    if data == "product_details":
+    if query.data == "product_details":
         detail_text = (
             "*Affiliate Product Generator — 5 in 1*\n\n"
             "Fitur utama:\n"
@@ -163,7 +163,7 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     # --- show other links (opsional) ---
-    if data == "show_links":
+    if query.data == "show_links":
         links_text = (
             "🔗 *Link Penting*\n\n"
             f"• Beli produk: {LYNK_URL}\n"
