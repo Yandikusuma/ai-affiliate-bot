@@ -27,7 +27,7 @@ LOCAL_QUOTES = [
     "🔥 Konsisten kecil lebih penting dari pada motivasi besar.",
     "🎯 Kerjakan 1% hari ini, biar kamu unggul 100% besok.",
     "💡 Kreativitas bukan bakat, tapi kebiasaan.",
-    "🤖 AI tidak menggantikan manusia—AI menggantikan yang tidak mau belajar.",
+    "🤖 AI tidak menggantikan manusia — AI menggantikan yang tidak mau belajar.",
     "🌱 Mulai kecil. Lanjut pelan. Menang besar.",
 ]
 
@@ -106,7 +106,7 @@ def sync_generate_quote_openai(api_key: str) -> str:
     )
     # ChatCompletion (pake openai v0.27.x)
     resp = openai.ChatCompletion.create(
-        model="gpt-4o-mini",
+        model="gpt-3.5-turbo",
         messages=[{"role": "user", "content": prompt}],
         max_tokens=60,
         temperature=0.8,
@@ -201,6 +201,28 @@ async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         import logging
         logging.exception("Quote AI error: %s", e)
 
+
+async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    text = (
+        "🤖 *AI Affiliate Academy — Help Menu*\n\n"
+        "Berikut daftar perintah yang bisa kamu gunakan:\n\n"
+        "• /start – Cek apakah bot aktif\n"
+        "• /rules – Lihat aturan grup\n"
+        "• /intro – Ambil template perkenalan\n"
+        "• /tools – Lihat tools rekomendasi\n"
+        "• /quote – Quote motivasi AI\n\n"
+        "Klik tombol di bawah untuk akses cepat."
+    )
+
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("📜 Rules", callback_data="show_rules")],
+        [InlineKeyboardButton("🙋 Intro", callback_data="intro_template")],
+        [InlineKeyboardButton("🛠️ Tools", callback_data="menu_tools")],
+        [InlineKeyboardButton("💬 Quote AI", callback_data="help_quote")],
+    ])
+
+    await update.message.reply_markdown(text, reply_markup=keyboard)
+
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -240,6 +262,14 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     #     await query.message.reply_markdown(links_text, disable_web_page_preview=True)
     #     return
 
+    if query.data == "help_quote":
+        await query.message.reply_text("Ketik /quote untuk mendapatkan quote motivasi dari AI ⚡")
+        return
+
+    if query.data == "menu_tools":
+        await query.message.reply_text("Ketik /tools untuk melihat tools rekomendasi 🔧")
+        return
+
 # ====== Function to build and run the bot once ======
 def run_bot_once():
     if not TOKEN:
@@ -251,6 +281,7 @@ def run_bot_once():
     tg_app.add_handler(CommandHandler("rules", rules_command))
     tg_app.add_handler(CommandHandler("tools", tools_command))
     tg_app.add_handler(CommandHandler("quote", quote_command))
+    tg_app.add_handler(CommandHandler("help", help_command))
     tg_app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
     tg_app.add_handler(CallbackQueryHandler(callback_handler))
 
