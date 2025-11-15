@@ -3,6 +3,8 @@ import os
 import logging
 import time
 import openai
+import asyncio
+import os
 import random
 import threading
 import requests
@@ -18,9 +20,11 @@ TOKEN = os.environ.get("TOKEN")
 ADMIN_CHAT_ID = os.environ.get("ADMIN_CHAT_ID")  # contoh: "123456789"
 RESTART_DELAY = int(os.environ.get("RESTART_DELAY", "8"))  # detik tunggu sebelum restart
 
+
+# ====== QOUTES LOCAL =====
 LOCAL_QUOTES = [
     "🚀 Proses dulu, hasil belakangan.",
-    "🔥 Konsisten kecil lebih penting daripada motivasi besar.",
+    "🔥 Konsisten kecil lebih penting dari pada motivasi besar.",
     "🎯 Kerjakan 1% hari ini, biar kamu unggul 100% besok.",
     "💡 Kreativitas bukan bakat, tapi kebiasaan.",
     "🤖 AI tidak menggantikan manusia—AI menggantikan yang tidak mau belajar.",
@@ -89,30 +93,33 @@ def notify_admin(text: str):
 
 
 # ===== QOUTE AI =====
-async def generate_quote_ai():
-    openai_key = os.environ.get("OPENAI_API_KEY")
-    if not openai_key:
-        return random.choice(LOCAL_QUOTES)
-
-    openai.api_key = openai_key
-
+def sync_generate_quote_openai(api_key: str) -> str:
+    """
+    Panggilan synchronous ke OpenAI ChatCompletion.
+    Gunakan run_in_executor untuk memanggil ini dari async handler.
+    """
+    openai.api_key = api_key
     prompt = (
-        "Buatkan satu quote motivasi singkat (1-2 kalimat) untuk content creator "
-        "atau affiliate yang sedang membangun karya. Gunakan nada inspiratif, modern, "
-        "dan tambahkan 1 emoji di akhir."
+        "Buat satu quote motivasi singkat (1-2 kalimat) untuk content creator / "
+        "affiliate yang sedang membangun karya. Gunakan nada inspiratif, modern, "
+        "dan tambahkan satu emoji di akhir."
     )
+    # ChatCompletion (pake openai v0.27.x)
+    resp = openai.ChatCompletion.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=60,
+        temperature=0.8,
+    )
+    text = resp.choices[0].message.content.strip()
+    return text
 
-    try:
-        resp = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role":"user","content": prompt}],
-            max_tokens=60,
-            temperature=0.8
-        )
-        return resp.choices[0].message.content.strip()
-    except:
-        return random.choice(LOCAL_QUOTES)
-
+async def generate_quote_ai():
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENAI_API_KEY tidak ditemukan. Set env var di Railway.")
+    loop = asyncio.get_running_loop()
+    return await loop.run_in_executor(None, sync_generate_quote_openai, api_key)
 
 
 # ===== Flask health server (dipakai UptimeRobot) =====
@@ -174,9 +181,25 @@ async def tools_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_markdown(text, reply_markup=keyboard, disable_web_page_preview=True)
 
 async def quote_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    msg = await update.message.reply_text("🧠 Sedang membuat quote dari AI...")
-    quote = await generate_quote_ai()
-    await msg.edit_text(quote)
+    """
+    /quote -> selalu generate dari OpenAI.
+    Jika OpenAI gagal, user akan diberi tahu.
+    """
+    try:
+        waiting = await update.message.reply_text("🧠 Menghasilkan quote dari AI... tunggu sebentar.")
+        quote = await generate_quote_ai()
+        # tampilkan hasil
+        await waiting.edit_text(f"✨ *Quote AI*\n\n_{quote}_", parse_mode="Markdown")
+    except Exception as e:
+        # tampilkan pesan error yang ramah
+        err_msg = str(e)
+        if "OPENAI_API_KEY" in err_msg or "OPENAI_API_KEY" in repr(e):
+            await update.message.reply_text("⚠️ Bot belum dikonfigurasi: OPENAI_API_KEY belum diset di Railway.")
+        else:
+            await update.message.reply_text("⚠️ Gagal menghasilkan quote dari AI. Coba lagi nanti.")
+        # log di console (Railway logs)
+        import logging
+        logging.exception("Quote AI error: %s", e)
 
 async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
