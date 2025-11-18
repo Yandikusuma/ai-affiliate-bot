@@ -380,19 +380,63 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("Ketik /tools untuk melihat tools rekomendasi 🔧")
         return
 
+     # === tombol kirim tutorial ===
+    if query.data.startswith("tutorial_send|"):
+        key = query.data.split("|", 1)[1]
+        data = load_tutorials()
+
+        if key not in data:
+            await query.message.reply_text("❌ Tutorial tidak ditemukan.")
+            return
+
+        item = data[key]
+
+        try:
+            await context.bot.send_video(
+                chat_id=query.message.chat_id,
+                video=item["file_id"],
+                caption=item.get("title", key)
+            )
+        except Exception as e:
+            logger.exception(e)
+            await query.message.reply_text(f"Terjadi error: {e}")
+
+        return
+
 # ====== TUTORIAL HANDLERS ======
 async def list_tutorials_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = load_tutorials()
+
     if not data:
-        await update.message.reply_text("📭 Belum ada tutorial tersimpan. Admin bisa menambahkan dengan /addtutorial (reply ke video).")
+        await update.message.reply_text("📭 Belum ada tutorial tersimpan.")
         return
-    lines = ["📚 Daftar tutorial:"]
+
+    keyboard = []
+
+    # icon otomatis berdasarkan isi nama
+    def get_icon(title: str):
+        t = title.lower()
+        if "fashion" in t: return "👗"
+        if "capcut" in t: return "🎬"
+        if "riset" in t or "trending" in t: return "📊"
+        if "pro" in t: return "👜"
+        return "✨"
+
+    # build tombol
     for key, item in data.items():
-        title = item.get("title", "")
-        uploader = item.get("uploader_name", "admin")
-        ts = item.get("timestamp", "")
-        lines.append(f"- {key}  ({title}) — by {uploader} {ts}")
-    await update.message.reply_text("\n".join(lines))
+        title = item.get("title", key)
+        icon = get_icon(title)
+        keyboard.append([
+            InlineKeyboardButton(f"{icon} {title}", callback_data=f"tutorial_send|{key}")
+        ])
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_markdown(
+        "📚 *Daftar Tutorial*\n"
+        "Klik tombol di bawah untuk akses video tutorial 👇",
+        reply_markup=reply_markup
+    )
 
 async def tutorial_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     args = context.args
