@@ -482,9 +482,9 @@ def run_bot_once():
     tg_app.add_handler(CommandHandler("quote", quote_command))
     tg_app.add_handler(CommandHandler("help", help_command))
      # tutorial handlers
-    tg_app.add_handler(CommandHandler("tutorials", list_tutorials_cmd))
-    tg_app.add_handler(CommandHandler("tutorial", tutorial_cmd))
-    tg_app.add_handler(CommandHandler("addtutorial", add_tutorial_cmd))
+    tg_app.add_handler(CommandHandler("tutorials", list_tutorials_command))
+    tg_app.add_handler(CommandHandler("tutorial", tutorial_command))
+    tg_app.add_handler(CommandHandler("addtutorial", add_tutorial_command))
     tg_app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
     tg_app.add_handler(CallbackQueryHandler(callback_handler))
 
