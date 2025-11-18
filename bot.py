@@ -15,6 +15,8 @@ from telegram.ext import (
     ApplicationBuilder, CommandHandler, MessageHandler,
     filters, ContextTypes, CallbackQueryHandler
 )
+import json
+from datetime import datetime
 
 # ===== CONFIG =====
 TOKEN = os.environ.get("TOKEN")
@@ -131,6 +133,31 @@ LOCAL_QUOTES = [
 # -----------------------
 LYNK_URL = "https://lynk.id/siryanz/1mzez3ze9wlj"
 
+
+# ====== TUTORIAL STORAGE ======
+TUTORIAL_FILE = os.path.join(os.getcwd(), "tutorials.json")
+
+def load_tutorials():
+    try:
+        if not os.path.exists(TUTORIAL_FILE):
+            return {}
+        with open(TUTORIAL_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.exception("Gagal load tutorials.json: %s", e)
+        return {}
+
+def save_tutorials(data: dict):
+    try:
+        tmp = TUTORIAL_FILE + ".tmp"
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        os.replace(tmp, TUTORIAL_FILE)
+    except Exception as e:
+        logger.exception("Gagal save tutorials.json: %s", e)
+
+def normalize_key(name: str) -> str:
+    return name.strip().lower()
 
 
 # ====== WELCOME & RULES ======
@@ -353,6 +380,95 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.message.reply_text("Ketik /tools untuk melihat tools rekomendasi 🔧")
         return
 
+# ====== TUTORIAL HANDLERS ======
+async def list_tutorials_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    data = load_tutorials()
+    if not data:
+        await update.message.reply_text("📭 Belum ada tutorial tersimpan. Admin bisa menambahkan dengan /addtutorial (reply ke video).")
+        return
+    lines = ["📚 Daftar tutorial:"]
+    for key, item in data.items():
+        title = item.get("title", "")
+        uploader = item.get("uploader_name", "admin")
+        ts = item.get("timestamp", "")
+        lines.append(f"- {key}  ({title}) — by {uploader} {ts}")
+    await update.message.reply_text("\n".join(lines))
+
+async def tutorial_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if not args:
+        # tampilkan petunjuk singkat
+        await update.message.reply_text("Usage:\n/tutorials — list semua tutorial\n/tutorial <nama tutorial> — kirim video\nAdmin: /addtutorial <nama> (reply ke pesan video)")
+        return
+    name = " ".join(args).strip()
+    key = normalize_key(name)
+    data = load_tutorials()
+    item = data.get(key)
+    if not item:
+        await update.message.reply_text("❌ Tutorial tidak ditemukan. Cek daftar dengan /tutorials")
+        return
+    file_id = item.get("file_id")
+    caption = item.get("title", f"Tutorial: {name}")
+    try:
+        await update.effective_chat.send_video(file_id=file_id, caption=caption)
+    except Exception as e:
+        logger.exception("Error saat mengirim tutorial %s: %s", key, e)
+        await update.message.reply_text(f"Terjadi error saat mengirim video: {e}")
+
+async def add_tutorial_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user = update.effective_user
+    chat = update.effective_chat
+    # cek admin di grup (boleh juga ditambah OWNER_ID check jika perlu)
+    try:
+        member = await chat.get_member(user.id)
+        if member.status not in ("administrator", "creator"):
+            await update.message.reply_text("🚫 Hanya admin yang boleh menambah tutorial.")
+            return
+    except Exception:
+        # jika command di PM, tolak (atau implementasikan owner check)
+        await update.message.reply_text("Perintah ini hanya bisa dipakai di grup oleh admin.")
+        return
+
+    if not context.args:
+        await update.message.reply_text("Usage: /addtutorial <nama> (reply ke pesan video yang ingin disimpan)")
+        return
+
+    name = " ".join(context.args).strip()
+    key = normalize_key(name)
+
+    msg = update.message
+    video = None
+    if msg.reply_to_message and msg.reply_to_message.video:
+        video = msg.reply_to_message.video
+    elif msg.video:
+        video = msg.video
+    elif msg.reply_to_message and msg.reply_to_message.document and getattr(msg.reply_to_message.document, "mime_type", "").startswith("video"):
+        video = msg.reply_to_message.document
+    elif msg.document and getattr(msg.document, "mime_type", "").startswith("video"):
+        video = msg.document
+
+    if not video:
+        await update.message.reply_text("Harap reply ke pesan video atau lampirkan video saat menjalankan perintah /addtutorial.")
+        return
+
+    file_id = video.file_id
+    title = getattr(video, "file_name", None) or f"Tutorial {name}"
+    uploader_name = user.full_name or user.username or str(user.id)
+    ts = datetime.utcnow().isoformat(timespec="seconds") + "Z"
+
+    data = load_tutorials()
+    data[key] = {
+        "file_id": file_id,
+        "title": title,
+        "uploader_id": user.id,
+        "uploader_name": uploader_name,
+        "timestamp": ts
+    }
+    save_tutorials(data)
+    await update.message.reply_text(f"✅ Tutorial '{name}' berhasil disimpan. (key: {key})\nGunakan /tutorial {name} untuk memanggilnya.")
+
+
+
 # ====== Function to build and run the bot once ======
 def run_bot_once():
     if not TOKEN:
@@ -365,12 +481,18 @@ def run_bot_once():
     tg_app.add_handler(CommandHandler("tools", tools_command))
     tg_app.add_handler(CommandHandler("quote", quote_command))
     tg_app.add_handler(CommandHandler("help", help_command))
+     # tutorial handlers
+    tg_app.add_handler(CommandHandler("tutorials", list_tutorials_cmd))
+    tg_app.add_handler(CommandHandler("tutorial", tutorial_cmd))
+    tg_app.add_handler(CommandHandler("addtutorial", add_tutorial_cmd))
     tg_app.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_handler))
     tg_app.add_handler(CallbackQueryHandler(callback_handler))
 
     logger.info("Application built. Running polling...")
     # Run polling (blocking call)
     tg_app.run_polling()
+
+
 
 # ====== Supervisor loop: restart on crash & notify admin ======
 def main_supervisor():
