@@ -410,7 +410,7 @@ async def tutorial_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     file_id = item.get("file_id")
     caption = item.get("title", f"Tutorial: {name}")
     try:
-        await update.effective_chat.send_video(file_id=file_id, caption=caption)
+        await update.effective_chat.send_video(item["file_id"], caption=item.get("title", name))
     except Exception as e:
         logger.exception("Error saat mengirim tutorial %s: %s", key, e)
         await update.message.reply_text(f"Terjadi error saat mengirim video: {e}")
