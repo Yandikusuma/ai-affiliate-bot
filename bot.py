@@ -318,6 +318,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• /intro – Ambil template perkenalan\n"
         "• /tools – Lihat tools rekomendasi\n"
         "• /quote – Quote motivasi Hari Ini\n\n"
+        "• /tutorials – Lihat daftar video tutorial\n\n"
         "Klik tombol di bawah untuk akses cepat."
     )
 
@@ -326,6 +327,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🙋 Intro", callback_data="intro_template")],
         [InlineKeyboardButton("🛠️ Tools", callback_data="menu_tools")],
         [InlineKeyboardButton("💬 Quote AI", callback_data="help_quote")],
+        [InlineKeyboardButton("🎥 Tutorial", callback_data="open_tutorials")],
     ])
 
     await update.message.reply_markdown(text, reply_markup=keyboard)
@@ -379,7 +381,10 @@ async def callback_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if query.data == "menu_tools":
         await query.message.reply_text("Ketik /tools untuk melihat tools rekomendasi 🔧")
         return
-
+        
+    if query.data == "open_tutorials":
+        await list_tutorials_command(query, context)
+        return
      # === tombol kirim tutorial ===
     if query.data.startswith("tutorial_send|"):
         key = query.data.split("|", 1)[1]
